@@ -3,7 +3,7 @@ import debug from 'debug';
 import { v4 } from 'uuid';
 import deepmerge from 'deepmerge';
 import datadogMetrics from 'datadog-metrics';
-import type { Plugin } from 'vite';
+import type { PluginOption, Plugin } from 'vite';
 import {
   DXVitePluginProps,
   TrackingMetricKeys,
@@ -173,7 +173,7 @@ class DXVitePlugin {
     };
   }
 
-  dxMetricsWrapper(plugins: Plugin[]) {
+  dxMetricsWrapper(plugins: PluginOption[]) {
     return [this.dxMetricsPre(), ...plugins, this.dxMetricsPost()];
   }
 }
