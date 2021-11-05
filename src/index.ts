@@ -173,11 +173,8 @@ class DXVitePlugin {
     };
   }
 
-  dxMetricsWrapper(plugins: PluginOption[] | PluginOption) {
-    if (Array.isArray(plugins)) {
-      return [this.dxMetricsPre(), ...plugins, this.dxMetricsPost()];
-    }
-    return [this.dxMetricsPre(), plugins, this.dxMetricsPost()];
+  dxMetricsWrapper(plugins: (PluginOption | PluginOption[])[]) {
+    return [this.dxMetricsPre(), ...plugins, this.dxMetricsPost()];
   }
 }
 
