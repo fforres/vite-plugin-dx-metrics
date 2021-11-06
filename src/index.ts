@@ -96,6 +96,7 @@ class DXVitePlugin {
     value: number,
     typeOfTracking: 'histogram' | 'gauge' | 'increment',
   ) => {
+    d('Tracking "%s" as "%s". With value %s', key, typeOfTracking, value);
     if (!this.trackingEnabled) {
       d('Tracking disabled, will not track %s', key);
       return false;
@@ -104,7 +105,6 @@ class DXVitePlugin {
       d('Tracking key is not allowed, will not track %s', key);
       return false;
     }
-    d('Tracking "%s" as "%s". With value %s', key, typeOfTracking, value);
     return true;
   };
 
@@ -173,9 +173,13 @@ class DXVitePlugin {
     };
   }
 
-  dxMetricsWrapper(plugins: (PluginOption | PluginOption[])[]) {
+  dxMetricsWrapper = (plugins: (PluginOption | PluginOption[])[]) => {
     return [this.dxMetricsPre(), ...plugins, this.dxMetricsPost()];
-  }
+  };
+
+  getDxMetricsPrePlugin = this.dxMetricsPre;
+
+  getDxMetricsPostPlugin = this.dxMetricsPost;
 }
 
 export = DXVitePlugin;

@@ -1,10 +1,8 @@
 # DX-analytics-vite-plugin
 
-
 [![Github test badge](https://github.com/fforres/vite-plugin-dx-metrics/workflows/test/badge.svg)](https://github.com/fforres/vite-plugin-dx-metrics/actions?query=workflow%3Atest) [![npm version](https://badge.fury.io/js/%40fforres%2Fvite-plugin-dx.svg)](https://www.npmjs.com/package/@fforres/vite-plugin-dx)
 
 <img src="./logo/logo@2x.png" width="400px" style="max-width:100%;"></img>
-
 
 This vite plugin is written in typescript, and serves as a way to quickly gather meaningful information on a vite project's DX usage and sending it to datadog via [datadog-metrics](https://github.com/dbader/node-datadog-metrics).
 
@@ -35,7 +33,10 @@ npm install --save-dev @fforres/vite-plugin-dx
 ## Usage
 
 you can see some usage of it in the [./vite.config.ts](./vite.config.ts) file.
+
 But in essence you require the `@fforres/vite-plugin-dx` and wrap your vite plugins in your `vite.config` file. At a bare minimum you need to pass you datadog api key, you can get it from **https://<YOUR_ORG>.datadoghq.com/account/settings#api**
+
+`DXVitePlugin` exposes a `dxMetricsWrapper` function, you can wrap all your plugins for this plugin to work.
 
 ```TYPESCRIPT
 /* eslint-disable import/no-extraneous-dependencies */
@@ -58,6 +59,36 @@ export default defineConfig({
 
 ```
 
+Alternatively, you can also obtain a `pre` and `post` plugin and do this manually.
+
+e.g.
+
+````TYPESCRIPT
+/* eslint-disable import/no-extraneous-dependencies */
+import { defineConfig } from 'vite';
+import DXVitePlugin from './build/src/index.js';
+
+const { getDxMetricsPrePlugin, getDxMetricsPostPlugin } = new DXVitePlugin({
+  projectName: 'some-name',
+  dryRun: true,
+  datadogConfig: {
+    apiKey: 'some-key',
+    /* SOME DATADOG API KEY FROM https://<YOUR_ORG>.datadoghq.com/account/settings#api */
+  },
+});
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [
+    getDxMetricsPrePlugin(),
+    aPlugin,
+    anotherPlugin,
+    getDxMetricsPostPlugin()
+  ]),
+});
+
+```\
+
 ## Plugin Options
 
 Options are defined by [`DXVitePluginProps`](./src/types.ts)
@@ -65,7 +96,7 @@ Options are defined by [`DXVitePluginProps`](./src/types.ts)
 | Object Key         | Required | Default Value                                                   | Description                                                                                                                                                                                                                                                   |
 | ------------------ | :------: | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | projectName        |   yes    |                                                                 | Datadog's project name, will be added to each track call as `projectName` tag                                                                                                                                                                                 |
-| datadogConfig      |    no    | `{"prefix":"ux.vite.","flushIntervalSeconds":2}`             | Config object for [Datadog Metrics](https://github.com/dbader/node-datadog-metrics#readme) - Typescript Type [here](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/6970a8fffa0743f0f5fc918e187fa37f0d2675df/types/datadog-metrics/index.d.ts#L6-L36) |
+| datadogConfig      |    no    | `{"prefix":"ux.vite.","flushIntervalSeconds":2}`                | Config object for [Datadog Metrics](https://github.com/dbader/node-datadog-metrics#readme) - Typescript Type [here](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/6970a8fffa0743f0f5fc918e187fa37f0d2675df/types/datadog-metrics/index.d.ts#L6-L36) |
 | enabledKeysToTrack |    no    | `['recompile','recompile_session','compile','compile_session']` | An array of keys that will define what "keys" will be tracked. By Default we track all the keys                                                                                                                                                               |
 | tags               |    no    | `{}`                                                            | Extra tags to be added to [Datadog Metrics](https://github.com/dbader/node-datadog-metrics#readme) - An object shape of `{ tagName: "tagValue", environment: "production" }`                                                                                  |
 | dryRun             |    no    | `false`                                                         | If `true`, will not send tracking events to datadog.                                                                                                                                                                                                          |
@@ -78,7 +109,7 @@ Options are defined by [`DXVitePluginProps`](./src/types.ts)
   tags?: { [key: string]: string };
   dryRun?: boolean;
 }
-```
+````
 
 ## Development
 
@@ -95,10 +126,10 @@ is merged it will deploy a new version of the package.
 
 ## Current things being tracked
 
-| Metric               | Tracking key        | Description                                                                                                                                                                   | How are we tracking   |
-| -------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| Metric               | Tracking key        | Description                                                                  | How are we tracking   |
+| -------------------- | ------------------- | ---------------------------------------------------------------------------- | --------------------- |
 | compilationSession   | `compile_session`   | Tracks the time from when a "compilation" process starts, until it finishes. | histogram & increment |
-| recompilationSession | `recompile_session` | Tracks the time when module recompilation starts, until it finishes.  | histogram & increment |
+| recompilationSession | `recompile_session` | Tracks the time when module recompilation starts, until it finishes.         | histogram & increment |
 
 ## Things we might want to track but no decision yet
 

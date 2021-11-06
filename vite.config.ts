@@ -2,10 +2,7 @@
 import { defineConfig } from 'vite';
 import reactRefresh from '@vitejs/plugin-react-refresh';
 import { resolve } from 'path';
-// @ts-expect-error when the file hasn't been generated
-// (via running a yarn build) maps for it do not exist,
-// this should be fixed once we move vite.config.ts into the app folder
-import DXVitePlugin from './build/src/index.js';
+import DXVitePlugin from './src/index';
 
 const { dxMetricsWrapper } = new DXVitePlugin({
   projectName: 'some-name',
@@ -19,6 +16,9 @@ const { dxMetricsWrapper } = new DXVitePlugin({
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: dxMetricsWrapper([reactRefresh()]),
+  server: {
+    open: true,
+  },
   build: {
     target: 'es6',
     rollupOptions: {
