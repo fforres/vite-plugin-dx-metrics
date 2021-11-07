@@ -180,10 +180,7 @@ class DXVitePlugin {
     return [this.dxMetricsPre(), ...plugins, this.dxMetricsPost()];
   };
 
-  getPlugins = {
-    dxMetricsPrePlugin: this.dxMetricsPre,
-    dxMetricsPostPlugin: this.dxMetricsPost,
-  };
+  dxMetricsPlugins = [this.dxMetricsPre, this.dxMetricsPost] as const;
 }
 
 export = DXVitePlugin;
