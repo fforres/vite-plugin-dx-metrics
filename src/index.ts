@@ -3,6 +3,7 @@ import debug from 'debug';
 import { v4 } from 'uuid';
 import deepmerge from 'deepmerge';
 import datadogMetrics from 'datadog-metrics';
+import { performance } from 'perf_hooks';
 import type { PluginOption, Plugin } from 'vite';
 import {
   DXVitePluginProps,
@@ -145,9 +146,10 @@ class DXVitePlugin {
       },
       configureServer: (server) => {
         server.httpServer?.on('listening', () => {
-          const compileTime = Date.now() - (global as any).__vite_start_time;
-          this.trackGauge('compile_session', compileTime);
-          this.trackHistogram('compile_session', compileTime);
+          const startupDuration =
+            performance.now() - (global as any).__vite_start_time;
+          this.trackGauge('compile_session', startupDuration);
+          this.trackHistogram('compile_session', startupDuration);
         });
       },
     };
@@ -163,6 +165,7 @@ class DXVitePlugin {
           const startTime = this.dxTimeMap.get(id);
           const substracted = endtime - startTime!;
           const time = Math.floor(Number(substracted / BigInt(1000000)));
+          console.log({ time });
           this.trackGauge('recompile_session', time);
           this.trackHistogram('recompile_session', time);
           d(`elapsed time recompiling module %s, %d`, id, time);
@@ -177,9 +180,7 @@ class DXVitePlugin {
     return [this.dxMetricsPre(), ...plugins, this.dxMetricsPost()];
   };
 
-  getDxMetricsPrePlugin = this.dxMetricsPre;
-
-  getDxMetricsPostPlugin = this.dxMetricsPost;
+  dxMetricsPlugins = [this.dxMetricsPre, this.dxMetricsPost] as const;
 }
 
 export = DXVitePlugin;

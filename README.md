@@ -68,7 +68,7 @@ e.g.
 import { defineConfig } from 'vite';
 import DXVitePlugin from './build/src/index.js';
 
-const { getDxMetricsPrePlugin, getDxMetricsPostPlugin } = new DXVitePlugin({
+const { dxMetricsPlugins } = new DXVitePlugin({
   projectName: 'some-name',
   dryRun: true,
   datadogConfig: {
@@ -77,13 +77,15 @@ const { getDxMetricsPrePlugin, getDxMetricsPostPlugin } = new DXVitePlugin({
   },
 });
 
+const [dxMetricsPrePlugin, dxMetricsPostPlugin] = dxMetricsPlugins
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    getDxMetricsPrePlugin(),
+    dxMetricsPrePlugin(),
     aPlugin,
     anotherPlugin,
-    getDxMetricsPostPlugin()
+    dxMetricsPostPlugin()
   ]),
 });
 
