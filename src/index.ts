@@ -10,7 +10,12 @@ import {
   TrackingMetricKeys,
   trackingMetricKeys,
 } from './types';
-import { DEBUG_STRING, PLUGIN_NAME, PLUGIN_VERSION } from './constants';
+import {
+  DEBUG_STRING,
+  PLUGIN_NAME,
+  PLUGIN_PREFIX,
+  PLUGIN_VERSION,
+} from './constants';
 
 const d = debug(DEBUG_STRING);
 
@@ -28,8 +33,12 @@ class DXVitePlugin {
     dryRun: false,
     tags: {},
     datadogConfig: {
-      prefix: 'ux.vite.',
+      prefix: PLUGIN_PREFIX,
       flushIntervalSeconds: 2,
+    },
+    memoryTracking: {
+      enabled: true,
+      lapseTimeInMilliseconds: 2000,
     },
   };
 
@@ -39,6 +48,8 @@ class DXVitePlugin {
 
   private internallyDefinedTags: string[] = [];
 
+  private memoryTrackingInterval: ReturnType<typeof setInterval> | null = null;
+
   constructor(options: DXVitePluginProps) {
     this.options = deepmerge<Required<DXVitePluginProps>>(
       this.defaultOptions,
@@ -47,9 +58,24 @@ class DXVitePlugin {
     this.trackingEnabled = !this.options.dryRun;
     this.enabledKeysSet = new Set(this.options.enabledKeysToTrack);
     this.internallyDefinedTags = this.generateInternalTags();
-
     this.preflightCheck();
   }
+
+  private trackMemoryUsage = () => {
+    const { rss, heapUsed, heapTotal } = process.memoryUsage();
+    this.trackAll('process_memory', rss / 1024);
+    this.trackAll('heap_total', heapTotal / 1024);
+    this.trackAll('heap_used', heapUsed / 1024);
+  };
+
+  private initializeMemoryUsageTracking = () => {
+    if (this.options.memoryTracking.enabled) {
+      this.memoryTrackingInterval = setInterval(
+        this.trackMemoryUsage,
+        this.options.memoryTracking.lapseTimeInMilliseconds,
+      );
+    }
+  };
 
   private preflightCheck = () => {
     try {
@@ -61,6 +87,7 @@ class DXVitePlugin {
       }
       d('Options: %O', this.options);
       this.datadogClient.init(this.options.datadogConfig);
+      this.initializeMemoryUsageTracking();
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error('DXVitePlugin Preflight Check was not successful ❌');
@@ -130,6 +157,12 @@ class DXVitePlugin {
     this.datadogClient.increment(key, value, this.extendTags());
   };
 
+  private trackAll = (key: TrackingMetricKeys, value: number) => {
+    this.trackHistogram(key, value);
+    this.trackGauge(key, value);
+    this.trackIncrement(key, value);
+  };
+
   private dxMetricsPre(): Plugin {
     return {
       name: 'dx-metrics',
@@ -148,8 +181,7 @@ class DXVitePlugin {
         server.httpServer?.on('listening', () => {
           const startupDuration =
             performance.now() - (global as any).__vite_start_time;
-          this.trackGauge('compile_session', startupDuration);
-          this.trackHistogram('compile_session', startupDuration);
+          this.trackAll('compile_session_time', startupDuration);
         });
       },
     };
@@ -165,9 +197,7 @@ class DXVitePlugin {
           const startTime = this.dxTimeMap.get(id);
           const substracted = endtime - startTime!;
           const time = Math.floor(Number(substracted / BigInt(1000000)));
-          console.log({ time });
-          this.trackGauge('recompile_session', time);
-          this.trackHistogram('recompile_session', time);
+          this.trackAll('recompile_session_time', time);
           d(`elapsed time recompiling module %s, %d`, id, time);
           this.dxTimeMap.delete(id);
         }
