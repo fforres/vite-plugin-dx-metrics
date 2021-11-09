@@ -59,12 +59,10 @@ export class Tracker {
       this.datadogClient.init(this.datadogConfig);
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.error('DXVitePlugin Preflight Check was not successful ❌');
+      console.error('Tracker preflight Check was not successful ❌');
       // eslint-disable-next-line no-console
       console.error(e);
     }
-    // eslint-disable-next-line no-console
-    console.info('DXVitePlugin Preflight Check successful ✅. Ready to Start');
   };
 
   private extendTags = (tags: any[] = []) => [
