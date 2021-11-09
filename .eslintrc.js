@@ -28,6 +28,7 @@ module.exports = {
         tsx: 'never',
       },
     ],
+    'eslint-disable-next-line': ['error'],
     'prettier/prettier': [
       'error',
       {
