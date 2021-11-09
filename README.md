@@ -63,7 +63,7 @@ Alternatively, you can also obtain a `pre` and `post` plugin and do this manuall
 
 e.g.
 
-````TYPESCRIPT
+```TYPESCRIPT
 /* eslint-disable import/no-extraneous-dependencies */
 import { defineConfig } from 'vite';
 import DXVitePlugin from './build/src/index.js';
@@ -89,7 +89,8 @@ export default defineConfig({
   ]),
 });
 
-```\
+
+```
 
 ## Plugin Options
 
@@ -102,6 +103,7 @@ Options are defined by [`DXVitePluginProps`](./src/types.ts)
 | enabledKeysToTrack |    no    | `['recompile','recompile_session','compile','compile_session']` | An array of keys that will define what "keys" will be tracked. By Default we track all the keys                                                                                                                                                               |
 | tags               |    no    | `{}`                                                            | Extra tags to be added to [Datadog Metrics](https://github.com/dbader/node-datadog-metrics#readme) - An object shape of `{ tagName: "tagValue", environment: "production" }`                                                                                  |
 | dryRun             |    no    | `false`                                                         | If `true`, will not send tracking events to datadog.                                                                                                                                                                                                          |
+| memoryTracking     |    no    | `{ enabled: true, lapseTimeInMilliseconds: 2000 }`              | By default this will track memory usage of this process on every `lapseTimeInMilliseconds`                                                                                                                                                                    |
 
 ```TYPESCRIPT
 {
@@ -111,7 +113,7 @@ Options are defined by [`DXVitePluginProps`](./src/types.ts)
   tags?: { [key: string]: string };
   dryRun?: boolean;
 }
-````
+```
 
 ## Development
 
@@ -132,14 +134,3 @@ is merged it will deploy a new version of the package.
 | -------------------- | ------------------- | ---------------------------------------------------------------------------- | --------------------- |
 | compilationSession   | `compile_session`   | Tracks the time from when a "compilation" process starts, until it finishes. | histogram & increment |
 | recompilationSession | `recompile_session` | Tracks the time when module recompilation starts, until it finishes.         | histogram & increment |
-
-## Things we might want to track but no decision yet
-
-- **System info** [🔗](https://github.com/sebhildebrandt/systeminformation)
-  > Creepy factor. 😬 However maybe useful on companies/internally. Being able
-  > to debug, or on bigger companies it would be useful to figurwe out hat type
-  > of devices are slower/faster.
-- **git commit sha.**
-  > Creepy factor. 🤔
-- **branch**
-  > Creepy factor. 🤔
