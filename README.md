@@ -112,6 +112,7 @@ Options are defined by [`DXVitePluginProps`](./src/types.ts)
   enabledKeysToTrack?: TrackingMetricKeys[];
   tags?: { [key: string]: string };
   dryRun?: boolean;
+  memoryTracking: { enabled: true, lapseTimeInMilliseconds: 2000 }
 }
 ```
 

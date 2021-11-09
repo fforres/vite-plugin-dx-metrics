@@ -1,6 +1,6 @@
 {
   "name": "@fforres/vite-plugin-dx",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "build/src/index.js",
   "author": "fforres",
   "license": "MIT",
