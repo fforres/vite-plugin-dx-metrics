@@ -28,7 +28,7 @@ module.exports = {
         tsx: 'never',
       },
     ],
-    'eslint-disable-next-line': ['error'],
+    'no-console': ['error'],
     'prettier/prettier': [
       'error',
       {
